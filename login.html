@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,sans-serif;
+        }
+
+        body{
+            background:#f3f5f7;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+        }
+
+        .login-box{
+            width:380px;
+            background:#fff;
+            padding:30px;
+            border-radius:12px;
+            box-shadow:0 5px 20px rgba(0,0,0,.1);
+        }
+
+        h2{
+            text-align:center;
+            margin-bottom:25px;
+        }
+
+        input{
+            width:100%;
+            padding:12px;
+            margin-bottom:15px;
+            border:1px solid #ddd;
+            border-radius:6px;
+            font-size:15px;
+        }
+
+        button{
+            width:100%;
+            padding:12px;
+            border:none;
+            background:#007bff;
+            color:#fff;
+            border-radius:6px;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        button:hover{
+            background:#0056b3;
+        }
+
+        #msg{
+            margin-top:15px;
+            text-align:center;
+            color:red;
+        }
+
+        .loading{
+            opacity:.6;
+            pointer-events:none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+
+    <h2>Đăng nhập</h2>
+
+    <input
+        type="text"
+        id="username"
+        placeholder="Tên đăng nhập hoặc Email">
+
+    <input
+        type="password"
+        id="password"
+        placeholder="Mật khẩu">
+
+    <button onclick="login()">
+        Đăng nhập
+    </button>
+
+    <div id="msg"></div>
+
+</div>
+
+<script>
+
+async function login(){
+
+    const username=document.getElementById("username").value.trim();
+    const password=document.getElementById("password").value;
+
+    const btn=document.querySelector("button");
+    const msg=document.getElementById("msg");
+
+    msg.innerHTML="";
+
+    if(!username || !password){
+        msg.innerHTML="Vui lòng nhập đầy đủ thông tin";
+        return;
+    }
+
+    btn.classList.add("loading");
+    btn.innerHTML="Đang đăng nhập...";
+
+    try{
+
+        const res=await fetch("https://api.hiweb.vn/api/v1/user/login",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+                username:username,
+                password:password
+            })
+
+        });
+
+        const data=await res.json();
+
+        console.log(data);
+
+        // Nếu API trả về token
+        const token=
+            data.token ||
+            data.access_token ||
+            data.data?.token ||
+            data.data?.access_token ||
+            "";
+
+        if(token){
+
+            localStorage.setItem("token",token);
+
+            // Lưu toàn bộ thông tin user nếu có
+            if(data.user){
+                localStorage.setItem("user",JSON.stringify(data.user));
+            }
+
+            if(data.data){
+                localStorage.setItem("loginData",JSON.stringify(data.data));
+            }
+
+            msg.style.color="green";
+            msg.innerHTML="Đăng nhập thành công";
+
+            setTimeout(()=>{
+                window.location.href="index.html";
+            },800);
+
+        }else{
+
+            msg.innerHTML=data.message || "Sai tài khoản hoặc mật khẩu";
+
+        }
+
+    }catch(e){
+
+        console.error(e);
+        msg.innerHTML="Không thể kết nối tới máy chủ";
+
+    }
+
+    btn.classList.remove("loading");
+    btn.innerHTML="Đăng nhập";
+
+}
+
+</script>
+
+</body>
+</html>

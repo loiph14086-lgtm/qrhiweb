@@ -1,1 +1,108 @@
-1111
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tạo QR</title>
+
+<style>
+body{
+    font-family:Arial;
+    max-width:500px;
+    margin:40px auto;
+    padding:20px;
+}
+
+textarea,
+input[type=file]{
+    width:100%;
+    margin:10px 0;
+}
+
+textarea{
+    height:150px;
+}
+
+button{
+    padding:10px 20px;
+    cursor:pointer;
+}
+
+#result{
+    margin-top:20px;
+    word-break:break-all;
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+</head>
+<body>
+
+<h2>Tạo QR</h2>
+
+<textarea id="content" placeholder="Nhập nội dung..."></textarea>
+
+<input type="file" id="image" accept="image/*">
+
+<button onclick="upload()">Tạo QR</button>
+
+<div id="result"></div>
+
+<canvas id="qrcode"></canvas>
+
+<script>
+
+const token = localStorage.getItem("token");
+
+if(!token){
+    location.href="login.html";
+}
+
+async function upload(){
+
+    const formData = new FormData();
+
+    formData.append("content",document.getElementById("content").value);
+
+    const file=document.getElementById("image").files[0];
+
+    if(file){
+        formData.append("image",file);
+    }
+
+    const res=await fetch("https://api.hiweb.vn/api/v1/qr/create",{
+
+        method:"POST",
+
+        headers:{
+            Authorization:"Bearer "+token
+        },
+
+        body:formData
+
+    });
+
+    const data=await res.json();
+
+    console.log(data);
+
+    if(!data.url){
+        alert(data.message || "Có lỗi xảy ra");
+        return;
+    }
+
+    document.getElementById("result").innerHTML=
+        '<a href="'+data.url+'" target="_blank">'+data.url+"</a>";
+
+    QRCode.toCanvas(
+        document.getElementById("qrcode"),
+        data.url
+    );
+
+}
+
+</script>
+
+</body>
+</html>
