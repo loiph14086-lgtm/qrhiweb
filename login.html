@@ -138,9 +138,9 @@ async function login(){
         // Nếu API trả về token
         const token=
             data.token ||
-            data.access_token ||
+            data.Authorization ||
             data.data?.token ||
-            data.data?.access_token ||
+            data.data?.Authorization ||
             "";
 
         if(token){
@@ -148,8 +148,8 @@ async function login(){
             localStorage.setItem("token",token);
 
             // Lưu toàn bộ thông tin user nếu có
-            if(data.user){
-                localStorage.setItem("user",JSON.stringify(data.user));
+            if(data.Authorization){
+                localStorage.setItem("Authorization",JSON.stringify(data.Authorization));
             }
 
             if(data.data){
