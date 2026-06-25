@@ -136,26 +136,12 @@ async function login(){
         console.log(data);
 
         // Nếu API trả về token
-        const token=
-            data.token ||
-            data.Authorization ||
-            data.data?.token ||
-            data.data?.Authorization ||
-            "";
+        const token= data.Authorization;
 
         if(token){
 
             localStorage.setItem("token",token);
-
-            // Lưu toàn bộ thông tin user nếu có
-            if(data.Authorization){
-                localStorage.setItem("Authorization",JSON.stringify(data.Authorization));
-            }
-
-            if(data.data){
-                localStorage.setItem("loginData",JSON.stringify(data.data));
-            }
-
+ 
             msg.style.color="green";
             msg.innerHTML="Đăng nhập thành công";
 
