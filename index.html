@@ -40,8 +40,69 @@
     --page-w:min(92vw,420px);
     --page-h:min(88dvh,520px);
     --radius:12px;
-    --transition:.5s cubic-bezier(.4,0,.2,1);
+    --transition:.75s cubic-bezier(.22,.61,.36,1);
   }
+
+/* Tablet */
+@media (max-width:768px){
+
+  :root{
+    --page-w:min(94vw,390px);
+    --page-h:min(78dvh,650px);
+    --radius:10px;
+  }
+
+}
+
+/* Điện thoại */
+@media (max-width:480px){
+
+  :root{
+    --page-w:94vw;
+    --page-h:60dvh;
+    --radius:8px;
+  }
+
+  #header h1{
+    font-size:18px;
+    letter-spacing:1px;
+  }
+
+  #header .subtitle{
+    font-size:9px;
+    letter-spacing:2px;
+  }
+
+  .nav-btn{
+    width:42px;
+    height:42px;
+  }
+
+}
+
+/* Điện thoại rất nhỏ (iPhone SE, Android 5.5") */
+@media (max-width:360px){
+
+  :root{
+    --page-w:96vw;
+    --page-h:46dvh;
+  }
+
+  #header h1{
+    font-size:16px;
+  }
+
+  .nav-btn{
+    width:38px;
+    height:38px;
+    font-size:16px;
+  }
+
+  #page-counter{
+    font-size:12px;
+  }
+
+}
 
   html,body{
     width:100%;height:100%;
@@ -172,7 +233,7 @@
     position:relative;
     width:var(--page-w);
     height:var(--page-h);
-    perspective:2000px;
+    perspective:3500px;
     border-radius:var(--radius);
 
     /* book cover shadow */
@@ -186,15 +247,19 @@
  
 
   /* ── Pages ── */
-  .page{
+.page{
     position:absolute;
     inset:0;
     transform-origin:left center;
     transform-style:preserve-3d;
     transition:transform var(--transition);
     cursor:pointer;
+
     will-change:transform;
-  }
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+}
 
   .face{
     position:absolute;inset:0;
@@ -394,7 +459,7 @@ else{
   // Tạo canvas placeholder cho mỗi trang
   for (let i = 0; i < total; i++) {
     const c = document.createElement("canvas");
-    c.style.cssText = "width:100%;  display:block;background:#fdf6ee";
+    c.style.cssText = "width:100%;height:100%;display:block;object-fit:cover;";
     canvases.push(c);
   }
 
@@ -490,12 +555,19 @@ if(config && config.type=="images"){
   }
 
   // ── Redraw trạng thái lật ─────────────────────────────────────────────
-  function applyPage(el, angle) {
-    el.style.transform = `rotateY(${angle}deg)`;
-    const t = Math.abs(angle) / 180;
-    el.querySelector(".shadow-front").style.opacity = t * 0.8;
-    el.querySelector(".shadow-back").style.opacity  = (1 - t) * 0.6;
-  }
+function applyPage(el, angle) {
+
+    requestAnimationFrame(()=>{
+
+        el.style.transform = `rotateY(${angle}deg)`;
+
+    });
+
+    const t = Math.sin(Math.abs(angle) * Math.PI / 180);
+
+    el.querySelector(".shadow-front").style.opacity = t * .9;
+    el.querySelector(".shadow-back").style.opacity  = t * .6;
+}
 
   function redraw() {
     pageEls.forEach((p, i) => applyPage(p, i < index ? -180 : 0));
