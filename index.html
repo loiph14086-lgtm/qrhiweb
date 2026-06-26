@@ -43,66 +43,7 @@
     --transition:.75s cubic-bezier(.22,.61,.36,1);
   }
 
-/* Tablet */
-@media (max-width:768px){
-
-  :root{
-    --page-w:min(94vw,390px);
-    --page-h:min(78dvh,650px);
-    --radius:10px;
-  }
-
-}
-
-/* Điện thoại */
-@media (max-width:480px){
-
-  :root{
-    --page-w:94vw;
-    --page-h:60dvh;
-    --radius:8px;
-  }
-
-  #header h1{
-    font-size:18px;
-    letter-spacing:1px;
-  }
-
-  #header .subtitle{
-    font-size:9px;
-    letter-spacing:2px;
-  }
-
-  .nav-btn{
-    width:42px;
-    height:42px;
-  }
-
-}
-
-/* Điện thoại rất nhỏ (iPhone SE, Android 5.5") */
-@media (max-width:360px){
-
-  :root{
-    --page-w:96vw;
-    --page-h:46dvh;
-  }
-
-  #header h1{
-    font-size:16px;
-  }
-
-  .nav-btn{
-    width:38px;
-    height:38px;
-    font-size:16px;
-  }
-
-  #page-counter{
-    font-size:12px;
-  }
-
-}
+ 
 
   html,body{
     width:100%;height:100%;
@@ -235,13 +176,7 @@
     height:var(--page-h);
     perspective:3500px;
     border-radius:var(--radius);
-
-    /* book cover shadow */
-    box-shadow:
-      0 2px 0 #0008,
-      0 8px 32px #0008,
-      0 24px 64px rgba(0,0,0,.5),
-      inset 0 1px 0 rgba(255,255,255,.07);
+ 
   }
 
  
@@ -266,8 +201,8 @@
     backface-visibility:hidden;
     -webkit-backface-visibility:hidden;
     overflow:hidden;
-    border-radius:var(--radius);
-    background:var(--cream);
+   
+  
   }
   .face.back{transform:rotateY(180deg);display: none;}
 
@@ -298,6 +233,7 @@
     font-family:Georgia,serif;
     pointer-events:none;
     backface-visibility:hidden;
+	display: none;
   }
 
   /* ── Navigation ── */
@@ -459,7 +395,7 @@ else{
   // Tạo canvas placeholder cho mỗi trang
   for (let i = 0; i < total; i++) {
     const c = document.createElement("canvas");
-    c.style.cssText = "width:100%;height:100%;display:block;object-fit:cover;";
+    c.style.cssText = "width:100%;  display:block;background:#fdf6ee";
     canvases.push(c);
   }
 
