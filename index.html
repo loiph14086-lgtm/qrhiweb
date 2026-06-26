@@ -2,107 +2,599 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tạo QR</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1b130e">
+<link rel="shortcut icon" href="https://s3.vn-hcm-1.vietnix.cloud/webhome/icon/khach1.png" type="image/x-icon" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title id="titlea"></title>
+<meta name="description" content="" />
+  <!-- Open Graph -->
+  <meta property="og:locale" content="vi_VN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content=""/>
+  <meta property="og:description" content="" />
+  <meta property="og:url" content="" />
+  <meta property="og:site_name" content="" />
+
+   
+  <meta property="og:image" content="" />
+  <meta property="og:image:secure_url" content="" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="" />
+  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <style>
-body{
-    font-family:Arial;
-    max-width:500px;
-    margin:40px auto;
-    padding:20px;
-}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
-textarea,
-input[type=file]{
-    width:100%;
-    margin:10px 0;
-}
+  :root{
+    --brown-deep:#1b130e;
+    --brown-mid:#2e1e12;
+    --brown-warm:#4a3524;
+    --gold:#c9973a;
+    --gold-light:#e8b96a;
+    --cream:#fdf6ee;
+    --page-w:min(92vw,420px);
+    --page-h:min(88dvh,520px);
+    --radius:12px;
+    --transition:.5s cubic-bezier(.4,0,.2,1);
+  }
 
-textarea{
-    height:150px;
-}
+  html,body{
+    width:100%;height:100%;
+    overflow:hidden;
+    font-family:'Segoe UI',Arial,sans-serif;
+    background:var(--brown-deep);
+    user-select:none;
+    -webkit-user-select:none;
+  }
 
-button{
-    padding:10px 20px;
+  body{
+    display:flex;flex-direction:column;
+    justify-content:center;align-items:center;
+    gap:10px;
+    background:radial-gradient(ellipse at 40% 30%,#3d2a18 0%,var(--brown-deep) 70%);
+  }
+
+  /* ── Loading ── */
+  #loading{
+    position:fixed;inset:0;
+    display:flex;flex-direction:column;
+    justify-content:center;align-items:center;
+    gap:20px;
+    background:radial-gradient(ellipse at 40% 30%,#3d2a18,var(--brown-deep));
+    z-index:999;
+    transition:opacity .4s;
+  }
+  #loading.hidden{opacity:0;pointer-events:none}
+
+  .spinner{
+    width:48px;height:48px;
+    border:3px solid rgba(201,151,58,.2);
+    border-top-color:var(--gold);
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .load-text{
+    color:var(--gold-light);
+    font-size:15px;
+    letter-spacing:.5px;
+  }
+
+  .load-bar-wrap{
+    width:160px;height:4px;
+    background:rgba(255,255,255,.1);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .load-bar{
+    height:100%;
+    background:linear-gradient(90deg,var(--gold),var(--gold-light));
+    border-radius:2px;
+    width:0%;
+    transition:width .2s;
+  }
+
+  /* ── Header ── */
+  #header{
+    display:flex;flex-direction:column;
+    align-items:center;
+    gap:4px;
+    padding-top:env(safe-area-inset-top,0px);
+	    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  #header .logo-line{
+    display:flex;align-items:center;gap-10px;
+    gap:10px;
+  }
+
+  #header .deco{
+    width:28px;height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold));
+  }
+  #header .deco.right{
+    background:linear-gradient(90deg,var(--gold),transparent);
+  }
+
+  #header h1{
+    font-family:Georgia,'Times New Roman',serif;
+    font-size:clamp(17px,4.5vw,22px);
+    font-weight:700;
+    letter-spacing:2.5px;
+    text-transform:uppercase;
+    color:var(--gold-light);
+    text-shadow:0 1px 8px rgba(201,151,58,.4);
+    white-space:nowrap;
+  }
+
+  #header .subtitle{
+    font-size:10px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:rgba(201,151,58,.55);
+  }
+
+  /* ── Footer ── */
+  #footer{
+    display:flex;align-items:center;gap:8px;
+    padding-bottom:env(safe-area-inset-bottom,0px);
+	    padding-right: 10px;
+    padding-left: 10px;
+  }
+  #footer .foot-line{
+    width:20px;height:1px;
+    background:rgba(201,151,58,.3);
+  }
+  #footer span{
+    font-size:10px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:rgba(201,151,58,.35);
+  }
+
+  /* ── Book wrapper ── */
+  #book-wrap{
+    position:relative;
+    display:flex;flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+
+  /* ── Book ── */
+  #book{
+    position:relative;
+    width:var(--page-w);
+    height:var(--page-h);
+    perspective:2000px;
+    border-radius:var(--radius);
+
+    /* book cover shadow */
+    box-shadow:
+      0 2px 0 #0008,
+      0 8px 32px #0008,
+      0 24px 64px rgba(0,0,0,.5),
+      inset 0 1px 0 rgba(255,255,255,.07);
+  }
+
+ 
+
+  /* ── Pages ── */
+  .page{
+    position:absolute;
+    inset:0;
+    transform-origin:left center;
+    transform-style:preserve-3d;
+    transition:transform var(--transition);
     cursor:pointer;
-}
+    will-change:transform;
+  }
 
-#result{
-    margin-top:20px;
-    word-break:break-all;
-}
+  .face{
+    position:absolute;inset:0;
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
+    overflow:hidden;
+    border-radius:var(--radius);
+    background:var(--cream);
+  }
+  .face.back{transform:rotateY(180deg);display: none;}
+
+  .face img{
+    width:100%;height:100%;
+    object-fit:contain;
+    display:block;
+    background:var(--cream);
+  }
+
+  /* Page curl shadow */
+  .shadow-front,.shadow-back{
+    position:absolute;inset:0;
+    border-radius:var(--radius);
+    pointer-events:none;
+    transition:opacity var(--transition);
+    opacity:0;
+  }
+  .shadow-front{background:linear-gradient(to right,rgba(0,0,0,.4) 0%,transparent 40%)}
+  .shadow-back{background:linear-gradient(to left,rgba(0,0,0,.3) 0%,transparent 40%)}
+
+  /* Page number badge on face */
+  .page-badge{
+    position:absolute;
+    bottom:8px;right:10px;
+    font-size:10px;
+    color:rgba(0,0,0,.3);
+    font-family:Georgia,serif;
+    pointer-events:none;
+    backface-visibility:hidden;
+  }
+
+  /* ── Navigation ── */
+  #nav{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+
+  .nav-btn{
+    width:44px;height:44px;
+    border:1.5px solid rgba(201,151,58,.4);
+    border-radius:50%;
+    background:rgba(201,151,58,.08);
+    color:var(--gold-light);
+    font-size:18px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:background .2s,border-color .2s,transform .15s;
+    touch-action:manipulation;
+    flex-shrink:0;
+  }
+  .nav-btn:active{transform:scale(.92);background:rgba(201,151,58,.2)}
+  .nav-btn:disabled{opacity:.3;cursor:default}
+
+  #page-counter{
+    color:var(--gold-light);
+    font-size:13px;
+    letter-spacing:.5px;
+    min-width:64px;
+    text-align:center;
+    font-variant-numeric:tabular-nums;
+  }
+
+
+
+  /* ── Error state ── */
+  #error{
+    display:none;
+    flex-direction:column;align-items:center;gap:12px;
+    color:var(--gold-light);
+    text-align:center;
+    padding:24px;
+  }
+  #error .err-icon{font-size:40px}
+  #error p{font-size:14px;opacity:.7;max-width:260px;line-height:1.5}
+
+  @media(prefers-reduced-motion:reduce){
+    .page{transition:none}
+  }
 </style>
-
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
 </head>
 <body>
 
-<h2>Tạo QR</h2>
+<!-- Loading -->
+<div id="loading">
+  <div class="spinner"></div>
+  <div class="load-text">Loading…</div>
+  <div class="load-bar-wrap"><div class="load-bar" id="load-bar"></div></div>
+</div>
 
-<textarea id="content" placeholder="Nhập nội dung..."></textarea>
+<!-- Error -->
+<div id="error">
+  <div class="err-icon">📄</div>
+  <p>File not found<strong> File</strong>.<br>Please place the file in the same directory as this page..</p>
+</div>
 
-<input type="file" id="image" accept="image/*">
+<!-- Header -->
+<header id="header">
+<img id="logo" width="150" src="" style="display:none">
+  <div class="logo-line">
+  
+    <div class="deco"></div>
+    <h1 id="title"></h1>
+    <div class="deco right"></div>
+  </div>
+  <div class="subtitle" id="subtitle"></div>
+</header>
 
-<button onclick="upload()">Tạo QR</button>
+<!-- Book -->
+<div id="book-wrap">
+  <div id="book"></div>
+  <nav id="nav">
+    <button class="nav-btn" id="btn-prev" aria-label="Trang trước" disabled>‹</button>
+    <span id="page-counter">— / —</span>
+    <button class="nav-btn" id="btn-next" aria-label="Trang sau">›</button>
+  </nav>
+</div>
 
-<div id="result"></div>
+<!-- Footer -->
+<footer id="footer">
+  <div class="foot-line"></div>
+  <span id="footerin"></span>
+  <div class="foot-line"></div>
+</footer>
 
-<canvas id="qrcode"></canvas>
+<script type="module">
+  pdfjsLib.GlobalWorkerOptions.workerSrc =
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-<script>
+  const book    = document.getElementById("book");
+  const loading = document.getElementById("loading");
+  const loadBar = document.getElementById("load-bar");
+  const counter = document.getElementById("page-counter");
+  const btnPrev = document.getElementById("btn-prev");
+  const btnNext = document.getElementById("btn-next");
+  const errEl   = document.getElementById("error");
 
-const token = localStorage.getItem("token");
+  const SCALE      = 1.5;          // cố định — đủ nét, nhẹ hơn devicePixelRatio*1.5
+  const PRELOAD    = 2;            // render trước N trang tiếp theo
+  const rendered   = new Set();    // trang đã render xong
+  const canvases   = [];           // canvas[i] = canvas của trang i (0-based)
+  let images=[];
+  const pageEls    = [];           // DOM .page elements
+  let   pdf, total, index = 0;
+  let config;
 
-if(!token){
-    location.href="login.html";
+  // ── Mở PDF, build DOM skeleton ngay (không render ảnh vội) ───────────
+  try {
+ 
+    //pdf   = await pdfjsLib.getDocument("menu.pdf").promise;
+const menu_uuid = new URLSearchParams(location.search).get("menu_uuid");
+
+const res = await fetch(
+    "https://api.hiweb.vn/api/v1/qr/hiweb_menu_online?menu_uuid=" + menu_uuid + "&_=" + Date.now()
+);
+
+const json = await res.json();
+
+if(!json.status){
+    throw new Error("Menu not found");
 }
 
-async function upload(){
+config = json.data;
 
-    const formData = new FormData();
 
-    formData.append("content",document.getElementById("content").value);
 
-    const file=document.getElementById("image").files[0];
+if(config.type=="pdf"){
 
-    if(file){
-        formData.append("image",file);
-    }
+    pdf = await pdfjsLib.getDocument(
+        config.files[0] + "?v=" + config.version
+    ).promise;
 
-    const res=await fetch("https://api.hiweb.vn/api/v1/qr/create",{
-
-        method:"POST",
-
-        headers:{
-            Authorization: token
-        },
-
-        body:formData
-
-    });
-
-    const data=await res.json();
-
-    console.log(data);
-
-    if(!data.url){
-        alert(data.message || "Có lỗi xảy ra");
-        return;
-    }
-
-    document.getElementById("result").innerHTML=
-        '<a href="'+data.url+'" target="_blank">'+data.url+"</a>";
-
-    QRCode.toCanvas(
-        document.getElementById("qrcode"),
-        data.url
-    );
+    total = pdf.numPages;
 
 }
+else{
+
+    total = config.files.length;
+
+}
+  } catch (e) {
+    loading.classList.add("hidden");
+    errEl.style.display = "flex";
+    document.getElementById("book-wrap").style.display = "none";
+    throw e;
+  }
+
+  // Tạo canvas placeholder cho mỗi trang
+  for (let i = 0; i < total; i++) {
+    const c = document.createElement("canvas");
+    c.style.cssText = "width:100%;  display:block;background:#fdf6ee";
+    canvases.push(c);
+  }
+
+if(config && config.type=="images"){
+
+    for(const file of config.files){
+
+        const img=new Image();
+
+        img.src=file+"?v="+config.version;
+
+        await img.decode();
+
+        images.push(img);
+
+    }
+
+}
+
+  // Build DOM pages (front = trang i, back = trang i+1)
+  for (let i = 0; i < total; i++) {
+    const p = document.createElement("div");
+    p.className  = "page";
+    p.style.zIndex = total - i;
+
+    const front = document.createElement("div");
+    front.className = "face";
+    front.appendChild(canvases[i]);
+    front.insertAdjacentHTML("beforeend",
+      `<span class="page-badge">${i + 1}</span><div class="shadow-front"></div>`);
+
+    const back = document.createElement("div");
+    back.className = "face back";
+    if (i + 1 < total) back.appendChild(canvases[i + 1]);
+    back.insertAdjacentHTML("beforeend", `<div class="shadow-back"></div>`);
+
+    p.appendChild(front);
+    p.appendChild(back);
+    book.appendChild(p);
+    pageEls.push(p);
+  }
+
+  loading.classList.add("hidden");
+
+  // ── Render một trang vào canvas (gọi 1 lần duy nhất) ─────────────────
+  async function renderPage(i) {
+  
+if(config && config.type=="images"){
+
+    const canvas=canvases[i];
+
+    const img=images[i];
+
+    if(!img)return;
+
+    canvas.width=img.width;
+
+    canvas.height=img.height;
+
+    canvas.getContext("2d")
+          .drawImage(img,0,0);
+
+    rendered.add(i);
+
+    return;
+
+}
+
+
+
+    if (rendered.has(i) || i < 0 || i >= total) return;
+    rendered.add(i); // đánh dấu ngay để tránh double-render
+
+    const page     = await pdf.getPage(i + 1);
+    const viewport = page.getViewport({ scale: SCALE });
+    const canvas   = canvases[i];
+    canvas.width   = viewport.width;
+    canvas.height  = viewport.height;
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+  }
+
+  // ── Preload: render trang hiện tại + PRELOAD trang xung quanh ─────────
+  async function preload() {
+    const targets = [];
+    for (let d = 0; d <= PRELOAD; d++) {
+      targets.push(index + d, index - d);
+    }
+    // render tuần tự để không spike CPU
+    for (const i of targets) await renderPage(i);
+
+    // cập nhật progress bar dựa trên số trang đã render
+    loadBar.style.width = `${(rendered.size / total) * 100}%`;
+  }
+
+  // ── Redraw trạng thái lật ─────────────────────────────────────────────
+  function applyPage(el, angle) {
+    el.style.transform = `rotateY(${angle}deg)`;
+    const t = Math.abs(angle) / 180;
+    el.querySelector(".shadow-front").style.opacity = t * 0.8;
+    el.querySelector(".shadow-back").style.opacity  = (1 - t) * 0.6;
+  }
+
+  function redraw() {
+    pageEls.forEach((p, i) => applyPage(p, i < index ? -180 : 0));
+    counter.textContent = `${index + 1} / ${total}`;
+    btnPrev.disabled = index === 0;
+    btnNext.disabled = index >= total - 1;
+    preload(); // render lazy sau mỗi lần lật
+  }
+
+  redraw(); // khởi động — chỉ render trang 0 + 1 + 2
+
+  // ── Navigate ──────────────────────────────────────────────────────────
+  function next() { if (index < total - 1) { index++; redraw(); } }
+  function prev() { if (index > 0)         { index--; redraw(); } }
+
+  btnNext.addEventListener("click", next);
+  btnPrev.addEventListener("click", prev);
+
+  book.addEventListener("click", e => {
+    const x = e.clientX - book.getBoundingClientRect().left;
+    x > book.clientWidth / 2 ? next() : prev();
+  });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") next();
+    if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   prev();
+  });
+
+  let sx = 0, sy = 0;
+  book.addEventListener("touchstart", e => {
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+  }, { passive: true });
+
+  book.addEventListener("touchend", e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < Math.abs(dy) * 0.7) return;
+    if (dx < -40) next();
+    if (dx >  40) prev();
+  }, { passive: true });
+  
+  
+  
+  document.title = config.title || "Menu";
+
+document.getElementById("title").textContent =
+    config.title || "";
+
+document.getElementById("titlea").textContent =
+    config.title || "";
+
+document.getElementById("subtitle").textContent =
+    config.description || "";
+	
+document.getElementById("footerin").textContent =
+    config.footer || "";
+	
+// Description
+document.querySelector('meta[name="description"]').content =
+    config.description || "";
+
+// Open Graph
+document.querySelector('meta[property="og:title"]').content =
+    config.title || "";
+
+document.querySelector('meta[property="og:description"]').content =
+    config.description || "";
+
+document.querySelector('meta[property="og:url"]').content =
+    window.location.href;
+
+document.querySelector('meta[property="og:site_name"]').content =
+    config.title || "";
+
+document.querySelector('meta[property="og:image"]').content =
+    config.image || "";
+
+document.querySelector('meta[property="og:image:secure_url"]').content =
+    config.image || "";
+
+document.querySelector('meta[property="og:image:alt"]').content =
+    config.title || "";
+	
+	
+const logo = document.getElementById("logo");
+
+if(config.logo){
+
+    logo.src = config.logo;
+    logo.style.display = "block";
+
+}else{
+
+    logo.style.display = "none";
+
+}
+
 
 </script>
-
 </body>
 </html>
