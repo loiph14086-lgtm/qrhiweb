@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Book Swipe Demo</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#2b2b2b;display:flex;justify-content:center;align-items:center;height:100vh;font-family:Arial}
+#book{position:relative;width:min(92vw,420px);height:min(92vh,620px);perspective:1800px}
+.page{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;transition:transform .5s ease;touch-action:none}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:10px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.face img{width:100%;height:100%;object-fit:cover}
+.back{transform:rotateY(180deg)}
+.shadow{position:absolute;inset:0;border-radius:10px;pointer-events:none;background:linear-gradient(to right,rgba(0,0,0,.35),transparent 35%);opacity:0;transition:.2s}
+.tip{position:fixed;top:15px;color:#fff}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#111;
+    touch-action:pan-y;
+}
+
+#book{
+    width:100vw;
+    height:100vh;
+    max-width:500px;
+    margin:auto;
+    aspect-ratio:2/3;
+}
+
+.page img{
+    object-fit:contain;
+    background:#000;
+}
+
+@media (max-width:768px){
+
+#book{
+    width:100vw;
+    height:100vh;
+}
+
+}
+/* ===== Reset ===== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:"Segoe UI",Arial,sans-serif;
+}
+
+/* ===== Background ===== */
+
+body{
+
+    background:
+    radial-gradient(circle at center,#4a3524,#1b130e 70%),
+    url("wood.jpg") center/cover no-repeat;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+}
+
+/* ===== Book ===== */
+
+#book{
+
+    position:relative;
+
+    width:min(95vw,430px);
+
+    height:min(90vh,680px);
+
+    perspective:2500px;
+
+    border-radius:20px;
+
+    background:#2b1b13;
+
+    padding:18px;
+
+    box-shadow:
+
+        0 35px 80px rgba(0,0,0,.6),
+
+        inset 0 0 0 2px #8f6d33,
+
+        inset 0 0 20px rgba(255,255,255,.05);
+
+}
+
+/* ===== Leather Cover ===== */
+
+#book::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:-12px;
+
+    border-radius:24px;
+
+    background:
+
+    linear-gradient(135deg,#5b2d18,#2a1209);
+
+    box-shadow:
+
+        inset 0 0 15px rgba(255,255,255,.08),
+
+        inset 0 -8px 20px rgba(0,0,0,.4),
+
+        0 15px 45px rgba(0,0,0,.6);
+
+    z-index:-2;
+
+}
+
+/* ===== Gold Border ===== */
+
+#book::after{
+
+    content:"";
+
+    position:absolute;
+
+    inset:-3px;
+
+    border-radius:22px;
+
+    border:2px solid #d7b35d;
+
+    z-index:-1;
+
+}
+
+/* ===== Pages ===== */
+
+.page{
+
+    position:absolute;
+
+    inset:18px;
+
+    transform-origin:left center;
+
+    transform-style:preserve-3d;
+
+    transition:.45s;
+
+    cursor:pointer;
+
+}
+
+/* ===== Images ===== */
+
+.face{
+
+    position:absolute;
+
+    inset:0;
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    background:#fff;
+
+    backface-visibility:hidden;
+
+    box-shadow:
+
+        0 10px 30px rgba(0,0,0,.25);
+
+}
+
+.face img{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:contain;
+
+    background:white;
+
+}
+
+.back{
+
+    transform:rotateY(180deg);
+
+}
+
+/* ===== Paper ===== */
+
+.face::after{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+
+    linear-gradient(to right,
+
+    rgba(0,0,0,.08),
+
+    transparent 10%,
+
+    transparent 90%,
+
+    rgba(0,0,0,.04));
+
+    pointer-events:none;
+
+}
+
+/* ===== Shadow ===== */
+
+.shadow{
+
+    position:absolute;
+
+    inset:0;
+
+    border-radius:12px;
+
+    background:
+
+    linear-gradient(to right,
+
+    rgba(0,0,0,.35),
+
+    transparent 40%);
+
+    opacity:0;
+
+    pointer-events:none;
+
+}
+
+/* ===== Header ===== */
+
+.logo{
+
+    position:fixed;
+
+    top:20px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    color:#f6d27b;
+
+    font-size:28px;
+
+    font-weight:bold;
+
+    letter-spacing:3px;
+
+    text-shadow:0 2px 8px #000;
+
+}
+
+/* ===== Footer ===== */
+
+.footer{
+
+    position:fixed;
+
+    bottom:18px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    color:#ddd;
+
+    font-size:13px;
+
+    opacity:.8;
+
+}
+
+/* ===== Mobile ===== */
+
+@media(max-width:768px){
+
+#book{
+
+    width:96vw;
+
+    height:92vh;
+
+    padding:12px;
+
+}
+
+.page{
+
+    inset:12px;
+
+}
+
+.logo{
+
+    font-size:22px;
+
+}
+
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="book"></div>
+<script>
+const pdf = await pdfjsLib.getDocument("menu.pdf").promise;
+
+for(let i=1;i<=pdf.numPages;i++){
+
+    const page = await pdf.getPage(i);
+
+    const viewport = page.getViewport({scale:2});
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    await page.render({
+        canvasContext:canvas.getContext("2d"),
+        viewport
+    }).promise;
+
+    const img = canvas.toDataURL();
+
+    // thêm vào book
+}
+const book=document.getElementById("book");
+
+imgs.forEach((img,i)=>{
+ const p=document.createElement("div");
+ p.className="page";
+ p.style.zIndex=imgs.length-i;
+p.innerHTML = `
+<div class="face">
+    <img src="${img}">
+</div>
+
+<div class="face back">
+    <img src="${nextImg}">
+</div>
+
+<div class="shadow"></div>
+`;
+ book.appendChild(p);
+});
+
+const pages=[...document.querySelectorAll(".page")];
+let index=0,drag=false,startX=0,angle=0;
+
+function apply(page,a){
+ page.style.transform=`rotateY(${a}deg)`;
+ page.querySelector(".shadow").style.opacity=Math.min(Math.abs(a)/180,1);
+}
+function layout(){
+ pages.forEach((p,i)=>{
+   if(i<index){apply(p,-180);}
+   else apply(p,0);
+ });
+}
+layout();
+
+function active(){return pages[index]}
+
+book.addEventListener("pointerdown",e=>{
+ if(index>=pages.length)return;
+ drag=true;
+ startX=e.clientX;
+ active().style.transition="none";
+});
+
+window.addEventListener("pointermove",e=>{
+ if(!drag)return;
+ let dx=e.clientX-startX;
+ dx=Math.min(0,dx);
+ angle=Math.max(-180,dx/book.clientWidth*180);
+ apply(active(),angle);
+});
+
+window.addEventListener("pointerup",()=>{
+ if(!drag)return;
+ drag=false;
+ const p=active();
+ p.style.transition="transform .45s ease";
+ if(angle<-90){
+   apply(p,-180);
+   index=Math.min(index+1,pages.length);
+ }else{
+   apply(p,0);
+ }
+ angle=0;
+});
+
+let sx=0;
+book.addEventListener("touchstart",e=>sx=e.touches[0].clientX,{passive:true});
+book.addEventListener("touchend",e=>{
+ let ex=e.changedTouches[0].clientX;
+ if(ex-sx>80 && index>0){
+   index--;
+   layout();
+ }
+});
+
+book.addEventListener("click", (e) => {
+    const rect = book.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+
+    if (x > rect.width / 2) {
+        nextPage();
+    } else {
+        prevPage();
+    }
+});
+
+function nextPage(){
+    if(index >= pages.length) return;
+    pages[index].style.transition="transform .45s";
+    apply(pages[index],-180);
+    index++;
+}
+
+function prevPage(){
+    if(index<=0) return;
+    index--;
+    pages[index].style.transition="transform .45s";
+    apply(pages[index],0);
+}
+</script>
+</body>
+</html>

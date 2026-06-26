@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PDF Flip Menu</title>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.min.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;font-family:Arial;background:#2b1b13}
+body{
+display:flex;justify-content:center;align-items:center;
+background:radial-gradient(circle,#4a3524,#1b130e);
+}
+#book{
+position:relative;
+width:min(95vw,430px);
+height:min(96dvh,760px);
+perspective:1800px;
+border-radius:20px;
+background:#3a2416;
+padding:12px;
+box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.page{
+position:absolute;inset:12px;
+transform-origin:left center;
+transform-style:preserve-3d;
+transition:transform .45s;
+cursor:pointer;
+}
+.face{
+position:absolute;inset:0;
+backface-visibility:hidden;
+overflow:hidden;
+border-radius:10px;
+background:#fff;
+}
+.face img{width:100%;height:100%;object-fit:contain;background:#fff}
+.back{transform:rotateY(180deg)}
+.shadow{
+position:absolute;inset:0;
+background:linear-gradient(to right,rgba(0,0,0,.35),transparent);
+opacity:0;pointer-events:none
+}
+.loading{
+position:fixed;
+color:#fff;
+font-size:18px;
+}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading">Đang tải menu...</div>
+<div id="book"></div>
+
+<script type="module">
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.js";
+
+const book=document.getElementById("book");
+const loading=document.getElementById("loading");
+
+const imgs=[];
+
+const pdf=await pdfjsLib.getDocument("menu.pdf").promise;
+
+for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const viewport=page.getViewport({scale:2});
+    const canvas=document.createElement("canvas");
+    canvas.width=viewport.width;
+    canvas.height=viewport.height;
+    await page.render({
+        canvasContext:canvas.getContext("2d"),
+        viewport
+    }).promise;
+    imgs.push(canvas.toDataURL("image/jpeg",0.95));
+}
+
+loading.remove();
+
+imgs.forEach((img,i)=>{
+    const p=document.createElement("div");
+    p.className="page";
+    p.style.zIndex=imgs.length-i;
+    const next=imgs[i+1]||img;
+    p.innerHTML=`
+        <div class="face"><img src="${img}"></div>
+        <div class="face back"><img src="${next}"></div>
+        <div class="shadow"></div>`;
+    book.appendChild(p);
+});
+
+const pages=[...document.querySelectorAll(".page")];
+let index=0;
+
+function apply(page,a){
+    page.style.transform=`rotateY(${a}deg)`;
+    page.querySelector(".shadow").style.opacity=Math.abs(a)/180;
+}
+
+function redraw(){
+    pages.forEach((p,i)=>apply(p,i<index?-180:0));
+}
+redraw();
+
+book.onclick=(e)=>{
+    const x=e.clientX-book.getBoundingClientRect().left;
+    if(x>book.clientWidth/2){
+        if(index<pages.length){index++;redraw();}
+    }else{
+        if(index>0){index--;redraw();}
+    }
+};
+
+let sx=0;
+book.addEventListener("touchstart",e=>sx=e.touches[0].clientX,{passive:true});
+book.addEventListener("touchend",e=>{
+ const ex=e.changedTouches[0].clientX;
+ if(sx-ex>50 && index<pages.length){index++;redraw();}
+ if(ex-sx>50 && index>0){index--;redraw();}
+});
+</script>
+
+</body>
+</html>
